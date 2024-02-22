@@ -3,9 +3,9 @@ import random
 
 GRID_SIZE = 10
 START_POINT = (0, 0)
-END_POINT = (GRID_SIZE - 1, GRID_SIZE - 1)
-# OBSTACLES = [(5, 5)] # 임의의 장애물 위치
-OBSTACLES = [(5, 5), (6, 6), (7, 7)] # 임의의 장애물 위치
+END_POINT = (GRID_SIZE + 1, GRID_SIZE + -1) # (15, 5)
+OBSTACLES = [] # 임의의 장애물 위치
+# OBSTACLES = [(5, 5), (6, 6), (7, 7)] # 임의의 장애물 위치
 
 MOVES = [(1, 0), (0, 1), (-1, 0), (0, -1)] # 우, 상, 좌, 하
 
@@ -24,7 +24,8 @@ class RobotPath:
 
     def random_path(self):
         # END_POINT까지 이동하기 위한 최소이동횟수 설정.
-        path_length = 2 * (GRID_SIZE - 1)
+        # path_length = 2 * (GRID_SIZE - 1)
+        path_length = (END_POINT[0]) + (END_POINT[1])
         return [random.choice(MOVES) for _ in range(path_length)]
     
     def fitness(self):
@@ -36,7 +37,7 @@ class RobotPath:
             next_position = (position[0] + move[0], position[1] + move[1])
 
             # GRID_SIZE를 벗어나는 이동 제한하기.
-            if not (0 <= next_position[0] < GRID_SIZE and 0 <= next_position[1] < GRID_SIZE):
+            if not (0 <= next_position[0] < END_POINT[0] + 1 and 0 <= next_position[1] < END_POINT[1] + 1):
                 score -= 50
                 continue
 
