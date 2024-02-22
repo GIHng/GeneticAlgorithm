@@ -7,16 +7,13 @@ END_POINT = (GRID_SIZE - 1, GRID_SIZE - 1)
 # OBSTACLES = [(5, 5)] # 임의의 장애물 위치
 OBSTACLES = [(5, 5), (6, 6), (7, 7)] # 임의의 장애물 위치
 
-MOVES = [(1, 0), (0, 1), (-1, 0), (0, -1)] # 상, 하, 좌, 우
+MOVES = [(1, 0), (0, 1), (-1, 0), (0, -1)] # 우, 상, 좌, 하
 
 POPULATION_SIZE = 100
 MUTATION_RATE = 0.01
-GENERATIONS = 100
+GENERATIONS = 1000
 
-STAGNATION_LIMIT = 20 # 성능 향상이 없는 세대 수 한계
-STAGNATION_COUNTER = 0 # 성능 향상이 없는 세대 수 카운터
 
-previous_best_fitness = None  # 이전 최고 적합도 점수
 
 class RobotPath:
     def __init__(self, moves = None):
@@ -33,6 +30,7 @@ class RobotPath:
     def fitness(self):
         position = START_POINT
         score = 0
+        goal_reached = False
 
         for move in self.moves:
             next_position = (position[0] + move[0], position[1] + move[1])
@@ -43,6 +41,7 @@ class RobotPath:
                 continue
 
             if next_position == END_POINT:
+                goal_reached = True
                 score += 1000
                 break
             
@@ -53,7 +52,7 @@ class RobotPath:
                 # 종료 지점에 가까워질수록 더 높은 점수를 부여하기.
                 score += max(0, 10 - (abs(END_POINT[0] - next_position[0]) + (abs(END_POINT[1] - next_position[1]))))
             position = next_position
-        return score
+        return score, goal_reached
 
     def crossover(self, other):
         crossover_point = random.randint(0, len(self.moves) - 1) # 마지막 경로 전.
@@ -78,9 +77,19 @@ def select(population):
     
     return selected
 
+def is_goal_reached(population, goal=END_POINT):
+    for path in population:
+        if (path.moves[-1][0], path.moves[-1][1]) == goal:
+            return True
+    return False
+
 def main():
     population = [RobotPath() for _ in range(POPULATION_SIZE)]
-    
+
+    STAGNATION_LIMIT = 100 # 성능 향상이 없는 세대 수 한계
+    STAGNATION_COUNTER = 0 # 성능 향상이 없는 세대 수 카운터
+
+    previous_best_fitness = None  # 이전 최고 적합도 점수
     for generation in range(GENERATIONS):
         # 현재 세대의 적합도 계산
         fitness_values = [path.fitness() for path in population]
@@ -93,8 +102,11 @@ def main():
             STAGNATION_COUNTER = 0
         previous_best_fitness = current_best_fitness
 
-        if STAGNATION_COUNTER >= STAGNATION_LIMIT:
-            print(f"성능 향상 정체 Gen {generation+1} 종료")
+        # if STAGNATION_COUNTER >= STAGNATION_LIMIT:
+        #     print(f"성능 향상 정체 Gen {generation+1} 종료")
+        #     break
+
+        if is_goal_reached(population):
             break
 
         selected = select(population)
@@ -117,9 +129,17 @@ def main():
         population = children
 
         # 갱신된 인구에 대해 적합도 다시 계산
-        fitness_values = [path.fitness() for path in population]
+        fitness_values, goals_reached = zip(*[path.fitness() for path in population])
+        
         best_fitness = max(fitness_values)
         print(f"Gen {generation + 1}: Best Fitness = {best_fitness}")
+
+        if any(goals_reached):
+            for path, goal_reached in zip(population, goals_reached):
+                if goal_reached:
+                    print("목표 지점에 도달한 경로:", path.moves)
+            print(f"목표 지점 도달 Gen {generation+1} 종료")
+            break
 
 
 if __name__ == "__main__":
