@@ -13,6 +13,7 @@ POPULATION_SIZE = 100
 MUTATION_RATE = 0.01
 GENERATIONS = 1000
 
+TOURNAMENT_SIZE = 5
 
 class RobotPath:
     def __init__(self, moves = None):
@@ -65,12 +66,15 @@ class RobotPath:
         mutation_point = random.randint(0, len(self.moves) - 1)
         self.moves[mutation_point] = random.choice(MOVES)
 
-def tournament_selection(population, tournament_size = 3):
-    tournament_group = random.sample(population, tournament_size)
+def tournament_selection(population, tournament_size = TOURNAMENT_SIZE):
+    selected = []
 
-    winner = max(tournament_group, key=lambda member: member.fitness())
+    for _ in range(POPULATION_SIZE // 2):
+        tournament_group = random.sample(population, tournament_size)
+        winner = max(tournament_group, key=lambda member: member.fitness())
+        selected.append(winner)
 
-    return winner
+    return selected
 
 def is_goal_reached(population, goal=END_POINT):
     for path in population:
@@ -104,7 +108,7 @@ def main():
         if is_goal_reached(population):
             break
 
-        selected = select(population)
+        selected = tournament_selection(population)
 
         children = []
 
