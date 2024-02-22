@@ -4,8 +4,8 @@ import random
 GRID_SIZE = 10
 START_POINT = (0, 0)
 END_POINT = (GRID_SIZE - 1, GRID_SIZE - 1)
-# OBSTACLES = [(5, 5)] # 임의의 장애물 위치
-OBSTACLES = [(5, 5), (6, 6), (7, 7)] # 임의의 장애물 위치
+OBSTACLES = [(5, 5)] # 임의의 장애물 위치
+# OBSTACLES = [(5, 5), (6, 6), (7, 7)] # 임의의 장애물 위치
 
 MOVES = [(1, 0), (0, 1), (-1, 0), (0, -1)] # 우, 상, 좌, 하
 
@@ -74,6 +74,7 @@ def tournament_selection(population, tournament_size = TOURNAMENT_SIZE):
         winner = max(tournament_group, key=lambda member: member.fitness())
         selected.append(winner)
 
+    # len(selected) -> POPULATION_SIZE // 2 * TOURNAMENT_SIZE
     return selected
 
 def is_goal_reached(population, goal=END_POINT):
@@ -137,6 +138,7 @@ def main():
             for path, goal_reached in zip(population, goals_reached):
                 if goal_reached:
                     print("목표 지점에 도달한 경로:", path.moves)
+                    break
             print(f"목표 지점 도달 Gen {generation+1} 종료")
             break
 
