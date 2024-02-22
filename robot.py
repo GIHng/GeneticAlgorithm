@@ -4,14 +4,19 @@ import random
 GRID_SIZE = 10
 START_POINT = (0, 0)
 END_POINT = (GRID_SIZE - 1, GRID_SIZE - 1)
-OBSTACLES = [(5, 5)] # 임의의 장애물 위치
-# OBSTACLES = [(5, 5), (6, 6), (7, 7)] # 임의의 장애물 위치
+# OBSTACLES = [(5, 5)] # 임의의 장애물 위치
+OBSTACLES = [(5, 5), (6, 6), (7, 7)] # 임의의 장애물 위치
 
 MOVES = [(1, 0), (0, 1), (-1, 0), (0, -1)] # 상, 하, 좌, 우
 
 POPULATION_SIZE = 100
 MUTATION_RATE = 0.01
 GENERATIONS = 100
+
+STAGNATION_LIMIT = 20 # 성능 향상이 없는 세대 수 한계
+STAGNATION_COUNTER = 0 # 성능 향상이 없는 세대 수 카운터
+
+previous_best_fitness = None  # 이전 최고 적합도 점수
 
 class RobotPath:
     def __init__(self, moves = None):
@@ -78,6 +83,19 @@ def main():
     
     for generation in range(GENERATIONS):
         # 현재 세대의 적합도 계산
+        fitness_values = [path.fitness() for path in population]
+        current_best_fitness = max(fitness_values)
+
+        if previous_best_fitness is not None and current_best_fitness <= previous_best_fitness:
+            STAGNATION_COUNTER += 1
+        else:
+            # 성능 향상이 있으면 리셋
+            STAGNATION_COUNTER = 0
+        previous_best_fitness = current_best_fitness
+
+        if STAGNATION_COUNTER >= STAGNATION_LIMIT:
+            print(f"성능 향상 정체 Gen {generation+1} 종료")
+            break
 
         selected = select(population)
 
