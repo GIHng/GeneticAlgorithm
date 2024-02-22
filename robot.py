@@ -21,7 +21,9 @@ class RobotPath:
             self.moves = moves
 
     def random_path(self):
-        return [random.choice(MOVES) for _ in range(GRID_SIZE * 2)]
+        # END_POINT까지 이동하기 위한 최소이동횟수 설정.
+        path_length = 2 * (GRID_SIZE - 1)
+        return [random.choice(MOVES) for _ in range(path_length)]
     
     def fitness(self):
         position = START_POINT
@@ -56,7 +58,7 @@ class RobotPath:
         return RobotPath(child1_moves), RobotPath(child2_moves)
 
     def mutate(self):
-        print("돌연변이 발생!!")
+        # print("돌연변이 발생!!")
         mutation_point = random.randint(0, len(self.moves) - 1)
         self.moves[mutation_point] = random.choice(MOVES)
 
