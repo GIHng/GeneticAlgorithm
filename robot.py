@@ -4,13 +4,14 @@ import random
 GRID_SIZE = 10
 START_POINT = (0, 0)
 END_POINT = (GRID_SIZE - 1, GRID_SIZE - 1)
-OBSTACLES = [(5, 5), (6, 6), (7, 7)] # 임의의 장애물 위치
+OBSTACLES = [(5, 5)] # 임의의 장애물 위치
+# OBSTACLES = [(5, 5), (6, 6), (7, 7)] # 임의의 장애물 위치
 
 MOVES = [(1, 0), (0, 1), (-1, 0), (0, -1)] # 상, 하, 좌, 우
 
 POPULATION_SIZE = 100
 MUTATION_RATE = 0.01
-GENERATIONS = 10
+GENERATIONS = 100
 
 class RobotPath:
     def __init__(self, moves = None):
@@ -26,7 +27,7 @@ class RobotPath:
         position = START_POINT
         score = 0
 
-        for move in self.random_path():
+        for move in self.moves:
             next_position = (position[0] + move[0], position[1] + move[1])
 
             # GRID_SIZE를 벗어나는 이동 제한하기.
@@ -39,7 +40,7 @@ class RobotPath:
                 break
             
             if next_position in OBSTACLES:
-                print("장애물 걸림")
+                # print("장애물 걸림")
                 score -= 100
             else:
                 # 종료 지점에 가까워질수록 더 높은 점수를 부여하기.
