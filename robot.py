@@ -1,7 +1,7 @@
 import numpy as np
 import random
 
-GRID_SIZE = 100
+GRID_SIZE = 10
 START_POINT = (0, 0)
 END_POINT = (GRID_SIZE - 1, GRID_SIZE - 1)
 OBSTACLES = [(5, 5), (6, 6), (7, 7)] # 임의의 장애물 위치
@@ -10,7 +10,7 @@ MOVES = [(1, 0), (0, 1), (-1, 0), (0, -1)] # 상, 하, 좌, 우
 
 POPULATION_SIZE = 100
 MUTATION_RATE = 0.01
-GENERATIONS = 100
+GENERATIONS = 10
 
 class RobotPath:
     def __init__(self, moves = None):
@@ -29,14 +29,21 @@ class RobotPath:
         for move in self.random_path():
             next_position = (position[0] + move[0], position[1] + move[1])
 
+            # GRID_SIZE를 벗어나는 이동 제한하기.
+            if not (0 <= next_position[0] < GRID_SIZE and 0 <= next_position[1] < GRID_SIZE):
+                score -= 50
+                continue
+
             if next_position == END_POINT:
                 score += 1000
                 break
             
             if next_position in OBSTACLES:
+                print("장애물 걸림")
                 score -= 100
             else:
-                score += 1
+                # 종료 지점에 가까워질수록 더 높은 점수를 부여하기.
+                score += max(0, 10 - (abs(END_POINT[0] - next_position[0]) + (abs(END_POINT[1] - next_position[1]))))
             position = next_position
         return score
 
@@ -48,6 +55,7 @@ class RobotPath:
         return RobotPath(child1_moves), RobotPath(child2_moves)
 
     def mutate(self):
+        print("돌연변이 발생!!")
         mutation_point = random.randint(0, len(self.moves) - 1)
         self.moves[mutation_point] = random.choice(MOVES)
 
@@ -66,7 +74,7 @@ def main():
     population = [RobotPath() for _ in range(POPULATION_SIZE)]
     
     for generation in range(GENERATIONS):
-        fitness_values = [path.fitness() for path in population]
+        # 현재 세대의 적합도 계산
 
         selected = select(population)
 
@@ -84,8 +92,11 @@ def main():
             if random.random() < MUTATION_RATE:
                 child.mutate()
 
+        # 인구를 자식 세대로 갱신
         population = children
 
+        # 갱신된 인구에 대해 적합도 다시 계산
+        fitness_values = [path.fitness() for path in population]
         best_fitness = max(fitness_values)
         print(f"Gen {generation + 1}: Best Fitness = {best_fitness}")
 
